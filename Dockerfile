@@ -1,4 +1,4 @@
-FROM 137112412989.dkr.ecr.us-west-2.amazonaws.com/amazonlinux:latest
+FROM amazonlinux:1
 
 RUN  yum group install -y "Development Tools"
 
@@ -37,7 +37,7 @@ RUN wget https://www.x.org/archive/individual/data/xkeyboard-config/xkeyboard-co
 RUN wget https://www.x.org/archive/individual/xserver/xorg-server-1.15.0.tar.gz && \
   tar -xzf xorg-server-1.15.0.tar.gz && \
   cd /app/xorg-server-1.15.0 && \
-  ./configure \
+  CC=gcc48 ./configure \
     --prefix=/usr/local \
     # --enable-glamor=no \
     --with-xkb-path=/var/task/xkb \
@@ -53,8 +53,6 @@ RUN wget https://www.x.org/releases/individual/app/xkbcomp-1.3.1.tar.gz && \
     --with-xkb-config-root=/var/task/xkb && \
     make -j8 && make install
 
-
-
 RUN wget http://x11vnc.sourceforge.net/dev/x11vnc-0.9.14-dev.tar.gz -O x11vnc.tar.gz && \
   tar xzf x11vnc.tar.gz && \
   cd x11vnc-0.9.14 && \
@@ -69,6 +67,33 @@ RUN wget http://sourceforge.net/projects/fluxbox/files/fluxbox/1.3.7/fluxbox-1.3
     --prefix=/usr/local && \
     make -j8 && make install
 
+
+# Install Stellarium dependencies
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.3/cmake-3.15.3.tar.gz && \
+  tar xzf cmake-3.15.3.tar.gz && \
+  cd cmake-3.15.3 && \
+  ./bootstrap && \
+  make -j8 && make install
+
+# https://doc.qt.io/qt-5/linux-requirements.html#
+# https://doc.qt.io/qt-5/configure-options.html#
+# https://doc.qt.io/qt-5/linux-building.html#
+RUN wget http://download.qt.io/archive/qt/5.13/5.13.1/single/qt-everywhere-src-5.13.1.tar.xz
+RUN tar xJf qt-everywhere-src-5.13.1.tar.xz
+
+# RUN  cd qt-everywhere-src-5.13.1 && \
+#  ./configure -opensource -confirm-license&& \
+#  gmake -j8 && gmake install
+
+# Install Stellarium
+
+# https://github.com/Stellarium/stellarium/wiki/Linux-build-dependencies
+# https://github.com/Stellarium/stellarium/wiki/Compilation-on-Linux
+#RUN wget https://github.com/Stellarium/stellarium/releases/download/v0.19.1/stellarium-0.19.1.tar.gz && \
+#  tar xzf stellarium-0.19.1.tar.gz && \
+#  cd stellarium-0.19.1 && \
+#  cmake . && \
+#  make -j8 && make install
 
 WORKDIR /app
 RUN mkdir -p /var/task/bin
